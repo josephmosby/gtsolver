@@ -1,0 +1,21 @@
+.wrapper {
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.edge {
+  stroke: var(--border);
+  stroke-width: 1.5px;
+}
+
+.infoSetLink {
+  stroke: var(--accent);
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 3;
+}
+
+.actionLabel {
+  fill: var(--text-muted);
+  font-size: 12px;
+}

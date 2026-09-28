@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { ActionChoiceInput } from './answer-inputs/ActionChoiceInput'
 import { StrategyChoiceInput } from './answer-inputs/StrategyChoiceInput'
 import { FeedbackPanel } from './FeedbackPanel'
 import styles from './QuestionRunner.module.css'
 import { checkAnswer } from '../../engine/checkAnswer'
 import { useProgress } from '../../persistence/progressStore'
 import { MatrixGameBoard } from '../matrix/MatrixGameBoard'
+import { ExtensiveFormTree } from '../tree/ExtensiveFormTree'
 import type { GameDefinition } from '../../types/game'
 import type { CheckResult, MatrixCell, Question, Submission } from '../../types/question'
 
@@ -54,6 +56,11 @@ export function QuestionRunner({ question, game, onAnswered, onNext }: QuestionR
       ? game.representation.strategies[question.subjectPlayer]
       : []
 
+  const nodeActions =
+    game.representation.kind === 'extensive-form' && question.locator.kind === 'node'
+      ? (game.representation.nodes[question.locator.nodeId].actions?.map((a) => a.label) ?? [])
+      : []
+
   return (
     <div className={styles.runner}>
       <p className={styles.prompt}>{question.prompt}</p>
@@ -69,7 +76,23 @@ export function QuestionRunner({ question, game, onAnswered, onNext }: QuestionR
         />
       )}
 
+      {game.representation.kind === 'extensive-form' && (
+        <ExtensiveFormTree
+          game={game.representation}
+          highlightNodeId={question.locator.kind === 'node' ? question.locator.nodeId : undefined}
+        />
+      )}
+
       {isCellSet && !submitted && <p className={styles.hint}>Click cells to select or deselect them.</p>}
+
+      {question.answer.kind === 'action' && (
+        <ActionChoiceInput
+          actions={nodeActions}
+          value={draft?.kind === 'action' ? draft.value : undefined}
+          onChange={(value) => setDraft({ kind: 'action', value })}
+          disabled={submitted}
+        />
+      )}
 
       {question.answer.kind === 'strategy' && (
         <StrategyChoiceInput

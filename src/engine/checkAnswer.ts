@@ -1,6 +1,7 @@
 import { checkBestResponse } from './checkers/bestResponse'
 import { checkDominantStrategy } from './checkers/dominantStrategy'
 import { checkNashEquilibriumCell } from './checkers/nashEquilibriumCell'
+import { checkNodeDecision } from './checkers/nodeDecision'
 import { checkParetoComparison } from './checkers/paretoComparison'
 import { diagnostics } from './diagnostics'
 import type { GameDefinition } from '../types/game'
@@ -16,6 +17,8 @@ function isCorrect(question: Question, submitted: Submission): boolean {
       return checkNashEquilibriumCell(question, submitted)
     case 'pareto-comparison':
       return checkParetoComparison(question, submitted)
+    case 'node-decision':
+      return checkNodeDecision(question, submitted)
     default:
       throw new Error(`No checker implemented yet for question type "${question.type}"`)
   }

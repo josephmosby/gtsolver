@@ -1,0 +1,24 @@
+.node {
+  fill: var(--bg-subtle);
+  stroke: var(--border);
+  stroke-width: 1.5px;
+}
+
+.node.highlighted {
+  fill: var(--accent-bg);
+  stroke: var(--accent);
+  stroke-width: 2px;
+}
+
+.playerCaption {
+  fill: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.payoffLabel {
+  fill: var(--text-h);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
