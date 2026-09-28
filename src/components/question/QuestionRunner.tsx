@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { ActionChoiceInput } from './answer-inputs/ActionChoiceInput'
+import { MultipleChoiceInput } from './answer-inputs/MultipleChoiceInput'
+import { NumericInput } from './answer-inputs/NumericInput'
 import { StrategyChoiceInput } from './answer-inputs/StrategyChoiceInput'
 import { FeedbackPanel } from './FeedbackPanel'
 import styles from './QuestionRunner.module.css'
@@ -83,7 +85,26 @@ export function QuestionRunner({ question, game, onAnswered, onNext }: QuestionR
         />
       )}
 
+      {game.representation.kind === 'scenario' && <p className={styles.scenarioText}>{game.representation.setupText}</p>}
+
       {isCellSet && !submitted && <p className={styles.hint}>Click cells to select or deselect them.</p>}
+
+      {question.answer.kind === 'numeric' && (
+        <NumericInput
+          value={draft?.kind === 'numeric' ? draft.value : undefined}
+          onChange={(value) => setDraft({ kind: 'numeric', value })}
+          disabled={submitted}
+        />
+      )}
+
+      {question.answer.kind === 'multiple-choice' && (
+        <MultipleChoiceInput
+          options={question.answer.options}
+          value={draft?.kind === 'multiple-choice' ? draft.value : undefined}
+          onChange={(value) => setDraft({ kind: 'multiple-choice', value })}
+          disabled={submitted}
+        />
+      )}
 
       {question.answer.kind === 'action' && (
         <ActionChoiceInput

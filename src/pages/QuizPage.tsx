@@ -3,16 +3,13 @@ import { Link, useParams } from 'react-router-dom'
 import styles from './QuizPage.module.css'
 import { QuestionRunner } from '../components/question/QuestionRunner'
 import { gamesById, questionsByGameId } from '../data/games/index'
-import type { CheckResult } from '../types/question'
+import type { GameDefinition } from '../types/game'
+import type { CheckResult, Question } from '../types/question'
 
 export function QuizPage() {
   const { gameId } = useParams<{ gameId: string }>()
   const game = gameId ? gamesById[gameId] : undefined
   const questions = gameId ? questionsByGameId[gameId] : undefined
-
-  const [index, setIndex] = useState(0)
-  const [correctCount, setCorrectCount] = useState(0)
-  const [answeredCount, setAnsweredCount] = useState(0)
 
   if (!game || !questions) {
     return (
@@ -22,6 +19,16 @@ export function QuizPage() {
       </div>
     )
   }
+
+  // Keyed by gameId so switching quizzes (e.g. via a direct link) fully resets progress
+  // through this quiz, instead of reusing stale index/score state from the previous game.
+  return <QuizSession key={game.id} game={game} questions={questions} />
+}
+
+function QuizSession({ game, questions }: { game: GameDefinition; questions: Question[] }) {
+  const [index, setIndex] = useState(0)
+  const [correctCount, setCorrectCount] = useState(0)
+  const [answeredCount, setAnsweredCount] = useState(0)
 
   function handleAnswered(result: CheckResult) {
     setAnsweredCount((c) => c + 1)

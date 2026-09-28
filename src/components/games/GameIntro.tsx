@@ -19,6 +19,7 @@ export function GameIntro({ game }: { game: GameDefinition }) {
       </div>
       {game.representation.kind === 'normal-form' && <MatrixGameBoard game={game.representation} />}
       {game.representation.kind === 'extensive-form' && <ExtensiveFormTree game={game.representation} />}
+      {game.representation.kind === 'scenario' && <p className={styles.description}>{game.representation.setupText}</p>}
       <Link to={`/quiz/${game.id}`} className={styles.startButton}>
         Start Quiz
       </Link>

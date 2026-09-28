@@ -1,5 +1,7 @@
 import { checkBestResponse } from './checkers/bestResponse'
 import { checkDominantStrategy } from './checkers/dominantStrategy'
+import { checkLevelKChoice } from './checkers/levelKChoice'
+import { checkMultipleChoice } from './checkers/multipleChoice'
 import { checkNashEquilibriumCell } from './checkers/nashEquilibriumCell'
 import { checkNodeDecision } from './checkers/nodeDecision'
 import { checkParetoComparison } from './checkers/paretoComparison'
@@ -19,6 +21,11 @@ function isCorrect(question: Question, submitted: Submission): boolean {
       return checkParetoComparison(question, submitted)
     case 'node-decision':
       return checkNodeDecision(question, submitted)
+    case 'level-k-choice':
+      return checkLevelKChoice(question, submitted)
+    case 'level-k-reasoning':
+    case 'focal-point-prediction':
+      return checkMultipleChoice(question, submitted)
     default:
       throw new Error(`No checker implemented yet for question type "${question.type}"`)
   }

@@ -38,3 +38,11 @@
   color: var(--text-muted);
   font-size: 13px;
 }
+
+.scenarioText {
+  max-width: 520px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}

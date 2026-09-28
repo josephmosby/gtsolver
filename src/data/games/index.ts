@@ -1,4 +1,6 @@
 import * as bankRun from './bank-run'
+import * as beautyContest from './beauty-contest'
+import * as divideTheCities from './divide-the-cities'
 import * as marketEntry from './market-entry'
 import * as prisonersDilemma from './prisoners-dilemma'
 import * as pureCoordination from './pure-coordination'
@@ -21,6 +23,8 @@ const modules: GameModule[] = [
   trustGame,
   marketEntry,
   bankRun,
+  beautyContest,
+  divideTheCities,
 ]
 
 export const games: GameDefinition[] = modules.map((m) => m.game)
