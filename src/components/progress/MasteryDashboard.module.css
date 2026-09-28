@@ -1,0 +1,45 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.label {
+  text-align: left;
+  color: var(--text-h);
+}
+
+.barTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.pct {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: 14px;
+}

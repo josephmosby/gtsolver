@@ -3,6 +3,7 @@ import { StrategyChoiceInput } from './answer-inputs/StrategyChoiceInput'
 import { FeedbackPanel } from './FeedbackPanel'
 import styles from './QuestionRunner.module.css'
 import { checkAnswer } from '../../engine/checkAnswer'
+import { useProgress } from '../../persistence/progressStore'
 import { MatrixGameBoard } from '../matrix/MatrixGameBoard'
 import type { GameDefinition } from '../../types/game'
 import type { CheckResult, MatrixCell, Question, Submission } from '../../types/question'
@@ -15,6 +16,7 @@ interface QuestionRunnerProps {
 }
 
 export function QuestionRunner({ question, game, onAnswered, onNext }: QuestionRunnerProps) {
+  const { recordAttempt } = useProgress()
   const [draft, setDraft] = useState<Submission | null>(null)
   const [selectedCells, setSelectedCells] = useState<MatrixCell[]>([])
   const [result, setResult] = useState<CheckResult | null>(null)
@@ -35,6 +37,13 @@ export function QuestionRunner({ question, game, onAnswered, onNext }: QuestionR
     if (!submission) return
     const checkResult = checkAnswer(question, game, submission)
     setResult(checkResult)
+    recordAttempt({
+      questionId: question.id,
+      gameId: question.gameId,
+      concept: question.concept,
+      correct: checkResult.correct,
+      misconceptionId: checkResult.misconceptionId,
+    })
     onAnswered?.(checkResult)
   }
 

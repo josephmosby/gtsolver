@@ -1,10 +1,13 @@
+import { ProgressProvider } from './persistence/progressStore'
 import { AppRouter } from './router'
 
 function App() {
   return (
-    <main className="app-shell">
-      <AppRouter />
-    </main>
+    <ProgressProvider>
+      <main className="app-shell">
+        <AppRouter />
+      </main>
+    </ProgressProvider>
   )
 }
 
