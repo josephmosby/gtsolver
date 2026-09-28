@@ -1,0 +1,35 @@
+.cell {
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 72px;
+  background: var(--bg);
+}
+
+.cell.highlighted {
+  background: var(--accent-bg);
+}
+
+.cell.selectable {
+  cursor: pointer;
+}
+
+.cell.selectable:hover {
+  background: var(--bg-subtle);
+}
+
+.cell.selected {
+  background: var(--accent-bg);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.rowPayoff {
+  color: var(--text-h);
+}
+
+.separator {
+  color: var(--text-muted);
+  margin: 0 2px;
+}

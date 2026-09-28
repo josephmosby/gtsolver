@@ -1,0 +1,47 @@
+.wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.cornerCell {
+  border: none;
+}
+
+.colPlayerLabel {
+  text-align: center;
+  padding: 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rowPlayerLabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px;
+}
+
+.strategyHeader {
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  background: var(--bg-subtle);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.strategyHeader.highlighted {
+  background: var(--accent-bg);
+  color: var(--accent);
+}

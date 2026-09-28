@@ -1,0 +1,40 @@
+.runner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+}
+
+.prompt {
+  font-size: 18px;
+  color: var(--text-h);
+  max-width: 560px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.submitButton,
+.nextButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+}
+
+.submitButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 13px;
+}
