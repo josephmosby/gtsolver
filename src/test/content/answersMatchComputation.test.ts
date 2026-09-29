@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allQuestions, gamesById } from '../../data/games/index'
+import { gameGenerators } from '../../data/games/index'
 import {
   allParetoOptimalCells,
   backwardInduction,
@@ -7,44 +7,50 @@ import {
   computeNashEquilibria,
 } from '../../engine/gameUtils'
 import { cellSetEqual } from '../../engine/matrixCell'
+import { mulberry32 } from '../../engine/random'
 
-describe('authored normal-form answers match pure computation', () => {
-  for (const question of allQuestions) {
-    const game = gamesById[question.gameId]
-    if (game.representation.kind !== 'normal-form') continue
-    const nf = game.representation
+const TRIALS = 50
 
-    if (question.type === 'nash-equilibrium-cell' && question.answer.kind === 'cell-set') {
-      it(`${question.id}: matches computeNashEquilibria`, () => {
-        expect(cellSetEqual(question.answer.kind === 'cell-set' ? question.answer.correct : [], computeNashEquilibria(nf))).toBe(true)
-      })
-    }
+describe('generated normal-form answers match pure computation across many random seeds', () => {
+  for (const [gameId, generate] of Object.entries(gameGenerators)) {
+    it(`${gameId}`, () => {
+      for (let seed = 0; seed < TRIALS; seed++) {
+        const { game, questions } = generate(mulberry32(seed))
+        if (game.representation.kind !== 'normal-form') return // not applicable to this game; skip
+        const nf = game.representation
 
-    if (question.type === 'pareto-comparison' && question.answer.kind === 'cell-set') {
-      it(`${question.id}: matches allParetoOptimalCells`, () => {
-        expect(cellSetEqual(question.answer.kind === 'cell-set' ? question.answer.correct : [], allParetoOptimalCells(nf))).toBe(true)
-      })
-    }
-
-    if (question.type === 'dominant-strategy' && question.answer.kind === 'strategy-or-none' && question.subjectPlayer) {
-      it(`${question.id}: matches computeDominantStrategy`, () => {
-        const playerIndex: 0 | 1 = nf.players[0] === question.subjectPlayer ? 0 : 1
-        expect(computeDominantStrategy(nf, playerIndex)).toBe(question.answer.kind === 'strategy-or-none' ? question.answer.correct : undefined)
-      })
-    }
+        for (const question of questions) {
+          if (question.type === 'nash-equilibrium-cell' && question.answer.kind === 'cell-set') {
+            expect(cellSetEqual(question.answer.correct, computeNashEquilibria(nf)), `seed ${seed}, ${question.id}`).toBe(true)
+          }
+          if (question.type === 'pareto-comparison' && question.answer.kind === 'cell-set') {
+            expect(cellSetEqual(question.answer.correct, allParetoOptimalCells(nf)), `seed ${seed}, ${question.id}`).toBe(true)
+          }
+          if (question.type === 'dominant-strategy' && question.answer.kind === 'strategy-or-none' && question.subjectPlayer) {
+            const playerIndex: 0 | 1 = nf.players[0] === question.subjectPlayer ? 0 : 1
+            expect(computeDominantStrategy(nf, playerIndex), `seed ${seed}, ${question.id}`).toBe(question.answer.correct)
+          }
+        }
+      }
+    })
   }
 })
 
-describe('authored extensive-form answers match backwardInduction', () => {
-  for (const question of allQuestions) {
-    const game = gamesById[question.gameId]
-    if (game.representation.kind !== 'extensive-form') continue
-    if (question.type !== 'node-decision' || question.answer.kind !== 'action' || question.locator.kind !== 'node') continue
-    const ef = game.representation
-    const nodeId = question.locator.nodeId
+describe('generated extensive-form answers match backwardInduction across many random seeds', () => {
+  for (const [gameId, generate] of Object.entries(gameGenerators)) {
+    it(`${gameId}`, () => {
+      for (let seed = 0; seed < TRIALS; seed++) {
+        const { game, questions } = generate(mulberry32(seed))
+        if (game.representation.kind !== 'extensive-form') return // not applicable to this game; skip
+        const ef = game.representation
+        const solved = backwardInduction(ef)
 
-    it(`${question.id}: matches backwardInduction`, () => {
-      expect(backwardInduction(ef)[nodeId].action).toBe(question.answer.kind === 'action' ? question.answer.correct : undefined)
+        for (const question of questions) {
+          if (question.type === 'node-decision' && question.answer.kind === 'action' && question.locator.kind === 'node') {
+            expect(solved[question.locator.nodeId].action, `seed ${seed}, ${question.id}`).toBe(question.answer.correct)
+          }
+        }
+      }
     })
   }
 })

@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { allQuestions, gamesById } from '../../data/games/index'
+import { gameGenerators } from '../../data/games/index'
+import { mulberry32 } from '../../engine/random'
 import type { GameDefinition } from '../../types/game'
 import type { Question } from '../../types/question'
+
+const TRIALS = 50
 
 function strategiesFor(game: GameDefinition, player: string): string[] {
   if (game.representation.kind !== 'normal-form') return []
@@ -95,21 +98,31 @@ function validateQuestion(question: Question, game: GameDefinition | undefined):
   return errors
 }
 
-describe('content integrity', () => {
-  it('every question resolves against its game', () => {
-    const allErrors = allQuestions.flatMap((question) => validateQuestion(question, gamesById[question.gameId]))
-    expect(allErrors).toEqual([])
-  })
+describe('content integrity across many randomized instances', () => {
+  for (const [gameId, generate] of Object.entries(gameGenerators)) {
+    it(`${gameId}: every question resolves against its game across ${TRIALS} random seeds`, () => {
+      for (let seed = 0; seed < TRIALS; seed++) {
+        const { game, questions } = generate(mulberry32(seed))
+        const errors = questions.flatMap((q) => validateQuestion(q, game))
+        expect(errors, `seed ${seed}`).toEqual([])
+      }
+    })
 
-  it('every question has a non-empty prompt and explanation', () => {
-    for (const question of allQuestions) {
-      expect(question.prompt.trim(), `${question.id} has an empty prompt`).not.toBe('')
-      expect(question.explanation.trim(), `${question.id} has an empty explanation`).not.toBe('')
-    }
-  })
+    it(`${gameId}: every question has a non-empty prompt and explanation across ${TRIALS} random seeds`, () => {
+      for (let seed = 0; seed < TRIALS; seed++) {
+        const { questions } = generate(mulberry32(seed))
+        for (const q of questions) {
+          expect(q.prompt.trim(), `seed ${seed}, ${q.id} has an empty prompt`).not.toBe('')
+          expect(q.explanation.trim(), `seed ${seed}, ${q.id} has an empty explanation`).not.toBe('')
+        }
+      }
+    })
 
-  it('question ids are unique', () => {
-    const ids = allQuestions.map((q) => q.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
+    it(`${gameId}: question ids are unique and stable across regenerations`, () => {
+      const idsA = generate(mulberry32(1)).questions.map((q) => q.id)
+      const idsB = generate(mulberry32(2)).questions.map((q) => q.id)
+      expect(new Set(idsA).size).toBe(idsA.length)
+      expect(idsA).toEqual(idsB)
+    })
+  }
 })

@@ -7,15 +7,20 @@ import * as pureCoordination from './pure-coordination'
 import * as rankedCoordination from './ranked-coordination'
 import * as stagHunt from './stag-hunt'
 import * as trustGame from './trust-game'
+import type { RNG } from '../../engine/random'
 import type { GameDefinition } from '../../types/game'
 import type { Question } from '../../types/question'
 
-interface GameModule {
+export interface GameModule {
   game: GameDefinition
   questions: Question[]
 }
 
-const modules: GameModule[] = [
+interface GameFile {
+  generateInstance: (rng?: RNG) => GameModule
+}
+
+const gameFiles: GameFile[] = [
   prisonersDilemma,
   pureCoordination,
   rankedCoordination,
@@ -27,12 +32,21 @@ const modules: GameModule[] = [
   divideTheCities,
 ]
 
-export const games: GameDefinition[] = modules.map((m) => m.game)
+// One unseeded instance per game, generated at module load — used only where payoff-agnostic
+// data is needed (catalog cards, mistake-history prompt lookup). Never used for grading.
+const catalogInstances = gameFiles.map((f) => ({ instance: f.generateInstance(), generateInstance: f.generateInstance }))
+
+export const games: GameDefinition[] = catalogInstances.map((c) => c.instance.game)
 
 export const gamesById: Record<string, GameDefinition> = Object.fromEntries(games.map((g) => [g.id, g]))
 
 export const questionsByGameId: Record<string, Question[]> = Object.fromEntries(
-  modules.map((m) => [m.game.id, m.questions]),
+  catalogInstances.map((c) => [c.instance.game.id, c.instance.questions]),
 )
 
-export const allQuestions: Question[] = modules.flatMap((m) => m.questions)
+export const allQuestions: Question[] = catalogInstances.flatMap((c) => c.instance.questions)
+
+/** Generates a fresh, freshly-randomized instance of a game. Use this (not the catalog above) for anything graded. */
+export const gameGenerators: Record<string, (rng?: RNG) => GameModule> = Object.fromEntries(
+  catalogInstances.map((c) => [c.instance.game.id, c.generateInstance]),
+)

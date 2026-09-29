@@ -2,17 +2,29 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './ReviewPage.module.css'
 import { QuestionRunner } from '../components/question/QuestionRunner'
-import { allQuestions, gamesById } from '../data/games/index'
+import { gameGenerators } from '../data/games/index'
 import { pickWeightedReviewQuestions } from '../engine/selectors'
 import { useProgress } from '../persistence/progressStore'
-import type { CheckResult } from '../types/question'
+import type { GameDefinition } from '../types/game'
+import type { CheckResult, Question } from '../types/question'
 
 const REVIEW_SESSION_SIZE = 10
 
+function buildReviewPool() {
+  const instances = Object.values(gameGenerators).map((generate) => generate())
+  const allQuestions: Question[] = instances.flatMap((i) => i.questions)
+  const gamesById: Record<string, GameDefinition> = Object.fromEntries(instances.map((i) => [i.game.id, i.game]))
+  return { allQuestions, gamesById }
+}
+
 export function ReviewPage() {
   const { state } = useProgress()
-  // Snapshot the picked set once per visit so it doesn't reshuffle as attempts are recorded mid-session.
-  const [questions] = useState(() => pickWeightedReviewQuestions(allQuestions, state, REVIEW_SESSION_SIZE))
+  // Generates one fresh instance per game and snapshots the picked set once per visit,
+  // so it doesn't reshuffle (or swap out the live payoffs) as attempts are recorded mid-session.
+  const [{ questions, gamesById }] = useState(() => {
+    const pool = buildReviewPool()
+    return { questions: pickWeightedReviewQuestions(pool.allQuestions, state, REVIEW_SESSION_SIZE), gamesById: pool.gamesById }
+  })
   const [index, setIndex] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)
   const [answeredCount, setAnsweredCount] = useState(0)

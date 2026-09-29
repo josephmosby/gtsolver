@@ -2,16 +2,16 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styles from './QuizPage.module.css'
 import { QuestionRunner } from '../components/question/QuestionRunner'
-import { gamesById, questionsByGameId } from '../data/games/index'
-import type { GameDefinition } from '../types/game'
-import type { CheckResult, Question } from '../types/question'
+import { gameGenerators } from '../data/games/index'
+import type { GameModule } from '../data/games/index'
+import type { RNG } from '../engine/random'
+import type { CheckResult } from '../types/question'
 
 export function QuizPage() {
   const { gameId } = useParams<{ gameId: string }>()
-  const game = gameId ? gamesById[gameId] : undefined
-  const questions = gameId ? questionsByGameId[gameId] : undefined
+  const generator = gameId ? gameGenerators[gameId] : undefined
 
-  if (!game || !questions) {
+  if (!generator) {
     return (
       <div>
         <p>Quiz not found.</p>
@@ -21,11 +21,13 @@ export function QuizPage() {
   }
 
   // Keyed by gameId so switching quizzes (e.g. via a direct link) fully resets progress
-  // through this quiz, instead of reusing stale index/score state from the previous game.
-  return <QuizSession key={game.id} game={game} questions={questions} />
+  // through this quiz, instead of reusing stale index/score state from the previous game —
+  // and generates a fresh randomized instance for this attempt.
+  return <QuizSession key={gameId} generator={generator} />
 }
 
-function QuizSession({ game, questions }: { game: GameDefinition; questions: Question[] }) {
+function QuizSession({ generator }: { generator: (rng?: RNG) => GameModule }) {
+  const [{ game, questions }] = useState(() => generator())
   const [index, setIndex] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)
   const [answeredCount, setAnsweredCount] = useState(0)
